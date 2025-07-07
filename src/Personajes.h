@@ -6,8 +6,11 @@
 
 struct Personaje {
     std::string nombre;
-    int hp, maxHp;
-    int atk, def;
+    std::string tipo;
+    int hp;
+    int maxHp;
+    int atk;
+    int def;
     std::vector<std::string> habilidades;
 };
 
