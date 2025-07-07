@@ -6,7 +6,6 @@
 
 struct Personaje {
     std::string nombre;
-    std::string tipo;
     int hp;
     int maxHp;
     int atk;
