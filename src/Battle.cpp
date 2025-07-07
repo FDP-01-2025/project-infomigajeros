@@ -12,6 +12,11 @@ Enemigo generarEnemigo(int nivel) {
     if (nivel == 99)
         return {"🦉 Rey Búho Supremo", 400, 40, 20};
 
+    if (nivel == 3)
+        return {"🔥 Dragón de Lava", 300, 35, 18};
+    if (nivel == 2)
+        return {"💀 Espectro Oscuro", 250, 30, 15};
+
     return {
         "🐍 Enemigo Nv." + to_string(nivel),
         80 + nivel * 20,
@@ -61,6 +66,9 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                     } else if (habilidad == "Defender" || habilidad == "Escudo Mágico") {
                         p.def += 5;
                         cout << p.nombre << " aumenta su defensa temporalmente.\n";
+                    } else if (habilidad == "Congelar") {
+                        enemigo.atk = max(0, enemigo.atk - 10);
+                        cout << p.nombre << " congela al enemigo y reduce su ataque.\n";
                     } else {
                         int dmg = 25;
                         enemigo.hp -= dmg;
@@ -90,6 +98,9 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                     } else if (inventario[obj - 1].efecto == "CurarTodo") {
                         p.hp = p.maxHp;
                         cout << p.nombre << " se cura por completo.\n";
+                    } else if (inventario[obj - 1].efecto == "BuffAtk") {
+                        p.atk += 10;
+                        cout << p.nombre << " usa " << inventario[obj - 1].nombre << " y aumenta su ataque.\n";
                     }
                     break;
                 }
