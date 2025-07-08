@@ -13,7 +13,7 @@ using namespace std;
 
 void runGame() {
     clearScreen();
-    typeWriter("🦉 ¡Bienvenido a Búho-Aventuras: La Batalla del Bosque Eterno! 🦉", 40);
+    typeWriter("Bienvenido a Buho-Aventuras: La Batalla del Bosque Eterno ", 40);
 
     // Cargar personajes y objetos
     vector<Personaje> equipo = crearEquipo();
@@ -31,12 +31,12 @@ void runGame() {
         Enemigo enemigo = generarEnemigo(nivel);
         bool victoria = batalla(equipo, enemigo, inventario, totalCurado, usoObjetos);
         if (!victoria) {
-            typeWriter("💀 Tu equipo ha sido derrotado...", 40);
+            typeWriter(" Tu equipo ha sido derrotado...", 40);
             mostrarLogros(logros);
             guardarInventario(inventario);
             return;
         }
-        typeWriter("🎉 ¡Has ganado la batalla!", 30);
+        typeWriter(" Has ganado la batalla", 30);
         pauseConsole("Continúa a la siguiente batalla...");
     }
 
@@ -45,9 +45,9 @@ void runGame() {
     bool final = batalla(equipo, jefeFinal, inventario, totalCurado, usoObjetos);
 
     if (final) {
-        typeWriter("🏆 ¡Felicidades! Has vencido al Rey Búho Supremo y salvado el bosque eterno. 🏆", 30);
+        typeWriter(" Felicidades, Has vencido al Rey Buho Supremo y salvado el bosque eterno. ", 30);
     } else {
-        typeWriter("💀 El Rey Búho Supremo ha vencido a tu equipo...", 30);
+        typeWriter(" El Rey Buho Supremo ha vencido a tu equipo...", 30);
     }
 
     // Calcular personajes vivos
@@ -62,5 +62,5 @@ void runGame() {
     // Guardar inventario actualizado
     guardarInventario(inventario);
 
-    pauseConsole("Fin del juego. Gracias por jugar 🦉");
+    pauseConsole("Fin del juego. Gracias por jugar ");
 }
