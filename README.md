@@ -55,6 +55,7 @@ Compilación multiplataforma: compatible con Windows/Linux usando comandos g++.
    **Carnet:** [00036225]
 
 2. **Nombre completo:** Yacira Elisheba Gutierrez 
+
    **Carnet:** [00173925]
 
 ## Instrucciones de Ejecución
