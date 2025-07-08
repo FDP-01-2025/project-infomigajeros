@@ -1,65 +1,192 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mi1WNrHU)
-# Proyecto de C++ - [Buho-aventuras]
+Nombre del juego:
+Buho-Aventuras
 
-## Descripción del Proyecto
+------------------------------------------------------------------------------------------------------------------------
 
-Temática y ambientación:El juego está ambientado en un mundo de fantasía mágica donde los jugadores encarnan a un equipo de héroes animales liderados por búhos sabios que buscan proteger el Bosque Ancestral de criaturas oscuras. La ambientación está inspirada en bosques mágicos, ruinas antiguas, y zonas elementales (fuego, hielo, sombra).
+Temática y ambientación:
+El juego está ambientado en un mundo de fantasía mágica donde los jugadores encarnan a un equipo de héroes animales liderados por búhos sabios que buscan proteger el Bosque Ancestral de criaturas oscuras. La ambientación está inspirada en bosques mágicos, ruinas antiguas, y zonas elementales como fuego, hielo y sombra.
 
-Mecánica principal:Sistema de combate por turnos en consola. Los jugadores eligen acciones por personaje: atacar, usar habilidad o usar un objeto. Hay enemigos con inteligencia simple, habilidades, y sistema de estados (veneno, defensa, congelado).
+------------------------------------------------------------------------------------------------------------------------
+
+Mecánica principal:
+Sistema de combate por turnos en consola. Los jugadores eligen acciones para cada personaje: atacar, usar habilidades o usar objetos. Los enemigos tienen inteligencia simple, habilidades y sistema de estados como veneno, defensa o congelado.
+
+------------------------------------------------------------------------------------------------------------------------
 
 Idea general de la jugabilidad:
+El jugador controla a 6 personajes con habilidades únicas.
 
-° El jugador controla a 6 personajes con habilidades únicas.
+Cada combate es una batalla por turnos.
 
-° Cada combate es una batalla por turnos.
+Hay objetos que curan, fortalecen o envenenan.
 
-° Hay objetos que curan, fortalecen o envenenan.
+Se registran logros al superar enemigos especiales.
 
-° Se guardan logros al superar enemigos especiales.
+El juego avanza en niveles (1 al 3 y jefe final).
 
-° El juego avanza en niveles (1 al 3 y jefe final).
+------------------------------------------------------------------------------------------------------------------------
+Aplicación de los temas vistos en Buho-Aventuras (con ejemplos del código)
 
-Aplicación de los temas vistos:
+Variables y tipos de datos
+Usamos variables para almacenar la información vital de personajes, enemigos y objetos, como salud, ataque, defensa, y para controlar estados del juego.
 
-° Variables y tipos de datos: uso de variables como int hp, string nombre, bool usoObjetos, etc. para representar estado y decisiones.
+int totalCurado = 0;  // Total de puntos de vida curados
+bool usoObjetos = false;  // Indica si se usaron objetos
+std::string nombre = p.nombre;  // Nombre de un personaje
 
-° Estructuras condicionales (if, else, switch): utilizadas para lógica de combate, decisiones del jugador, efectos de habilidades y objetos. Ejemplo: if (hp <= 0), switch (opcion).
+------------------------------------------------------------------------------------------------------------------------
+Estructuras condicionales (if, else, switch)
+Controlan el flujo de la lógica, decidiendo acciones, aplicando efectos y validando entradas
 
-° Ciclos (for, while, do while): for para mostrar menús e iterar personajes, while para el loop de batalla, do while puede usarse para validación de entrada.
+if (enemigo.hp <= 0) {
+    cout << "Enemigo derrotado!\n";
+} else {
+    cout << "El enemigo sigue con vida.\n";
+}
 
-° Funciones: separadas en módulos como mostrarBarraVida(), batalla(), usarItem(), guardarInventario(), etc.
+switch (opcion) {
+    case 1:
+        atacar(p, enemigo);
+        break;
+    case 2:
+        usarHabilidad(p, enemigo);
+        break;
+    case 3:
+        usarObjeto(p, inventario);
+        break;
+    default:
+        cout << "Opción inválida.\n";
+        break;
+}
 
-° Estructuras de datos: uso de struct como Personaje, Item, Enemigo, y vectores (vector<T>) para manejar listas dinámicas.
+------------------------------------------------------------------------------------------------------------------------
 
-° Manejo de archivos: se carga y guarda inventario con ifstream y ofstream desde y hacia inventory.txt.
+Ciclos (for, while, do while)
+Permiten repetir acciones, como mostrar menús, recorrer personajes o mantener activa la batalla.
 
-° Manejo de errores: validación de entrada del jugador, control de objetos agotados, habilidades inválidas, archivo inexistente.
+// For para mostrar barra de vida
+for (size_t i = 0; i < equipo.size(); ++i) {
+    mostrarBarraVida(equipo[i].nombre, equipo[i].hp, equipo[i].maxHp);
+}
 
-° Interfaz por consola: barra de vida con colores ANSI, menús, texto animado tipo máquina de escribir, mensajes estilizados.
+// While para mantener la batalla
+while (enemigo.hp > 0 && any_alive(equipo)) {
+    turnoJugador(equipo, enemigo);
+    if (enemigo.hp <= 0) break;
+    turnoEnemigo(enemigo, equipo);
+}
 
-° Consideraciones técnicas del desarrollo:
+// Do-while para validar opción
+int opcion;
+do {
+    cout << "Elige opción (1-3): ";
+    cin >> opcion;
+} while (opcion < 1 || opcion > 3);
 
+------------------------------------------------------------------------------------------------------------------------
+Funciones
+Organizan la lógica para reutilización y claridad.
+
+void atacar(Personaje& atacante, Enemigo& enemigo) {
+    int dano = max(0, atacante.atk - enemigo.def);
+    enemigo.hp -= dano;
+    cout << atacante.nombre << " ataca y causa " << dano << " de daño.\n";
+}
+
+bool batalla(std::vector<Personaje>& equipo, Enemigo& enemigo, std::vector<Item>& inventario, int& totalCurado, bool& usoObjetos);
+
+------------------------------------------------------------------------------------------------------------------------
+
+Estructuras de datos
+Usamos struct para representar personajes, enemigos y objetos, y vectores para colecciones dinámicas.
+
+struct Personaje {
+    std::string nombre;
+    int hp;
+    int atk;
+    int def;
+    std::vector<std::string> habilidades;
+};
+
+std::vector<Personaje> equipo;
+
+struct Item {
+    std::string nombre;
+    std::string efecto;
+    int cantidad;
+};
+
+std::vector<Item> inventario;
+
+------------------------------------------------------------------------------------------------------------------------
+
+Manejo de archivos
+El inventario se guarda y carga para mantener persistencia entre partidas.
+
+void guardarInventario(const std::vector<Item>& inventario) {
+    std::ofstream file("inventory.txt");
+    for (const auto& item : inventario) {
+        file << item.nombre << " " << item.cantidad << "\n";
+    }
+    file.close();
+}
+
+std::vector<Item> cargarInventario() {
+    std::ifstream file("inventory.txt");
+    std::vector<Item> inventario;
+    if (file.is_open()) {
+        // Código para leer y crear items
+    }
+    return inventario;
+}
+
+------------------------------------------------------------------------------------------------------------------------
+
+Manejo de errores
+Validamos entradas y estados para evitar fallos.
+
+if (opcion < 1 || opcion > 3) {
+    cout << "Opción inválida, intenta de nuevo.\n";
+    return;
+}
+
+if (item.cantidad <= 0) {
+    cout << "No quedan de ese objeto.\n";
+    break;
+}
+
+------------------------------------------------------------------------------------------------------------------------
+
+Interfaz por consola
+Usamos colores y barras de vida para mejorar la experiencia visual.
+
+void mostrarBarraVida(const std::string& nombre, int hp, int maxHp) {
+    int barraLength = 30;
+    int llenado = (hp * barraLength) / maxHp;
+
+    std::string color;
+    if (hp > maxHp * 0.5) color = "\033 32m";       // Verde
+    else if (hp > maxHp * 0.2) color = "\033 33m";  // Amarillo
+    else color = "\033 31m";                        // Rojo
+
+    cout << nombre << ": " << color;
+    for (int i = 0; i < llenado; ++i) cout << "#";
+    cout << "\033[0m";
+    for (int i = llenado; i < barraLength; ++i) cout << "-";
+    cout << "] " << hp << "/" << maxHp << "\n";
+}
+
+------------------------------------------------------------------------------------------------------------------------
+
+Consideraciones técnicas del desarrollo
 Lenguaje: C++
 
-Modularización: uso de archivos .h y .cpp separados (UI, Items, Personajes, Battle, Estados, Logros).
+Modularización clara con archivos .h y .cpp (Personajes, Items, Batalla, Estados, Logros, UI, Game)
 
-Compilación multiplataforma: compatible con Windows/Linux usando comandos g++.
+Persistencia de datos con manejo de archivos
 
-## Equipo
+Interfaz en consola con ANSI para colores y estilos
 
-- **Nombre del equipo:** Infomigajeros
+Control de errores y validaciones de entrada
 
-### Integrantes del equipo
-
-1. **Nombre completo:** Daniel Andrés Hernández Barahona  
-   **Carnet:** [00036225]
-
-2. **Nombre completo:** Yacira Elisheba Gutierrez 
-
-   **Carnet:** [00173925]
-
-## Instrucciones de Ejecución
-
-1. Clona este repositorio en tu máquina local:
-   ```bash
-   git clone [URL del repositorio]
+------------------------------------------------------------------------------------------------------------------------
