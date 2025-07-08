@@ -1,5 +1,8 @@
 #include "Batlle.h"
 #include "UI.h"
+#include "Estados.h"
+#include "Logros.h"
+
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -25,15 +28,26 @@ Enemigo generarEnemigo(int nivel) {
     };
 }
 
-bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventario) {
+bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventario, int& totalCurado, bool& usoObjetos) {
+    // Estados para enemigo y personajes
+    vector<Estado> estadosEnemigo;
+    vector<vector<Estado>> estadosPersonajes(equipo.size());
+
     while (enemigo.hp > 0 && any_of(equipo.begin(), equipo.end(), [](Personaje& p) { return p.hp > 0; })) {
         clearScreen();
         printSeparator(40);
         cout << "🧨 Batalla contra: " << enemigo.nombre << "\n";
         mostrarBarraVida(enemigo.nombre, enemigo.hp, 400);
 
-        for (auto& p : equipo) {
+        // Procesar estados del enemigo
+        procesarEstados(estadosEnemigo, enemigo.hp, enemigo.atk, enemigo.def);
+
+        for (size_t i = 0; i < equipo.size(); ++i) {
+            auto& p = equipo[i];
             if (p.hp <= 0) continue;
+
+            // Procesar estados del personaje
+            procesarEstados(estadosPersonajes[i], p.hp, p.atk, p.def);
 
             cout << "\n🎮 Turno de " << p.nombre << "\n";
             mostrarBarraVida(p.nombre, p.hp, p.maxHp);
@@ -50,8 +64,8 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                 }
                 case 2: {
                     cout << "🔮 Habilidades:\n";
-                    for (size_t i = 0; i < p.habilidades.size(); ++i)
-                        cout << i + 1 << ". " << p.habilidades[i] << "\n";
+                    for (size_t j = 0; j < p.habilidades.size(); ++j)
+                        cout << j + 1 << ". " << p.habilidades[j] << "\n";
                     cout << "Elige habilidad: ";
                     int hab;
                     cin >> hab;
@@ -61,11 +75,25 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                     }
                     string habilidad = p.habilidades[hab - 1];
                     if (habilidad == "Curar") {
-                        p.hp = min(p.maxHp, p.hp + 30);
-                        cout << p.nombre << " se cura 30 puntos de vida.\n";
-                    } else if (habilidad == "Defender" || habilidad == "Escudo Mágico") {
-                        p.def += 5;
+                        int cantidad = 30;
+                        p.hp = min(p.maxHp, p.hp + cantidad);
+                        totalCurado += cantidad;
+                        cout << p.nombre << " se cura " << cantidad << " puntos de vida.\n";
+                    } else if (habilidad == "Bendición") {
+                        aplicarEstado(estadosPersonajes[i], "BuffDef", 3);
+                        cout << p.nombre << " se protege con una bendición.\n";
+                    } else if (habilidad == "Defender") {
+                        aplicarEstado(estadosPersonajes[i], "BuffDef", 2);
                         cout << p.nombre << " aumenta su defensa temporalmente.\n";
+                    } else if (habilidad == "CurarTodo") {
+                        for (auto& aliado : equipo) {
+                            if (aliado.hp > 0) {
+                                int curado = 20;
+                                aliado.hp = min(aliado.maxHp, aliado.hp + curado);
+                                totalCurado += curado;
+                            }
+                        }
+                        cout << p.nombre << " lanza curación grupal.\n";
                     } else if (habilidad == "Congelar") {
                         enemigo.atk = max(0, enemigo.atk - 10);
                         cout << p.nombre << " congela al enemigo y reduce su ataque.\n";
@@ -78,8 +106,8 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                 }
                 case 3: {
                     cout << "🎒 Inventario:\n";
-                    for (size_t i = 0; i < inventario.size(); ++i)
-                        cout << i + 1 << ". " << inventario[i].nombre << " (x" << inventario[i].cantidad << ")\n";
+                    for (size_t j = 0; j < inventario.size(); ++j)
+                        cout << j + 1 << ". " << inventario[j].nombre << " (x" << inventario[j].cantidad << ")\n";
                     cout << "Elige objeto: ";
                     int obj;
                     cin >> obj;
@@ -87,31 +115,50 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                         cout << "Objeto inválido.\n";
                         break;
                     }
-                    if (inventario[obj - 1].cantidad <= 0) {
+
+                    Item& item = inventario[obj - 1];
+                    if (item.cantidad <= 0) {
                         cout << "No quedan de ese objeto.\n";
                         break;
                     }
-                    inventario[obj - 1].cantidad--;
-                    if (inventario[obj - 1].efecto == "Curar25") {
-                        p.hp = min(p.maxHp, p.hp + 25);
-                        cout << p.nombre << " recupera 25 puntos de vida.\n";
-                    } else if (inventario[obj - 1].efecto == "CurarTodo") {
+
+                    item.cantidad--;
+                    usoObjetos = true;
+
+                    if (item.efecto == "Curar25") {
+                        int cantidad = 25;
+                        p.hp = min(p.maxHp, p.hp + cantidad);
+                        totalCurado += cantidad;
+                        cout << p.nombre << " recupera " << cantidad << " puntos de vida.\n";
+                    } else if (item.efecto == "CurarTodo") {
                         p.hp = p.maxHp;
+                        totalCurado += p.maxHp;
                         cout << p.nombre << " se cura por completo.\n";
-                    } else if (inventario[obj - 1].efecto == "BuffAtk") {
-                        p.atk += 10;
-                        cout << p.nombre << " usa " << inventario[obj - 1].nombre << " y aumenta su ataque.\n";
+                    } else if (item.efecto == "Daño30") {
+                        enemigo.hp -= 30;
+                        cout << enemigo.nombre << " recibe 30 puntos de daño por bomba.\n";
+                    } else if (item.efecto == "Defensa10") {
+                        aplicarEstado(estadosPersonajes[i], "BuffDef", 3);
+                        cout << p.nombre << " aumenta su defensa.\n";
+                    } else if (item.efecto == "DañoPorTurno") {
+                        aplicarEstado(estadosEnemigo, "Veneno", 3);
+                        cout << enemigo.nombre << " ha sido envenenado.\n";
+                    } else {
+                        cout << "⚠️ Objeto no reconocido.\n";
                     }
+
                     break;
                 }
                 default:
                     cout << "Opción inválida.\n";
                     break;
             }
+
             pauseConsole("Presiona Enter para continuar...");
             if (enemigo.hp <= 0) break;
         }
 
+        // Turno del enemigo (si sigue vivo)
         if (enemigo.hp > 0) {
             vector<Personaje*> vivos;
             for (auto& p : equipo)

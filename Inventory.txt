@@ -1,0 +1,5 @@
+🧪 Poción Curar25 5
+✨ Elixir CurarTodo 2
+💣 Bomba_de_Fuego Daño30 3
+🛡️ Escudo_Mágico Defensa10 1
+☠️ Veneno DañoPorTurno 2

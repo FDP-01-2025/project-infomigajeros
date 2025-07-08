@@ -3,7 +3,7 @@
 
 #include "Personajes.h"
 #include "Items.h"
-#include <vector>
+#include "UI.h"
 
 struct Enemigo {
     std::string nombre;
@@ -13,6 +13,8 @@ struct Enemigo {
 };
 
 Enemigo generarEnemigo(int nivel);
-bool batalla(std::vector<Personaje>& equipo, Enemigo& enemigo, std::vector<Item>& inventario);
+
+// 🔧 Cambiar la firma de batalla:
+bool batalla(std::vector<Personaje>& equipo, Enemigo& enemigo, std::vector<Item>& inventario, int& totalCurado, bool& usoObjetos);
 
 #endif
