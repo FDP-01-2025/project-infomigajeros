@@ -1,7 +1,7 @@
-#include "Batlle.h"
-#include "UI.h"
-#include "Estados.h"
-#include "Logros.h"
+#include "Batlle.h"     // Main battle logic
+#include "UI.h"         // Console interface utilities (health bars, screen clearing, etc.)
+#include "Estados.h"    // Buffs, poison, and other status effects
+#include "Logros.h"     // Achievements
 
 #include <iostream>
 #include <cstdlib>
@@ -10,8 +10,10 @@
 
 using namespace std;
 
+// Generates an enemy based on the current game level
 Enemigo generarEnemigo(int nivel) {
-    srand(time(NULL));
+    srand(time(NULL));  // Seed for randomness (used in enemy selection and attacks)
+
     if (nivel == 99)
         return {"Rey Buho Supremo", 400, 40, 20};
 
@@ -20,6 +22,7 @@ Enemigo generarEnemigo(int nivel) {
     if (nivel == 2)
         return {"Espectro Oscuro", 250, 30, 15};
 
+    // Generic enemy scaling based on level
     return {
         "Enemigo Nv." + to_string(nivel),
         80 + nivel * 20,
@@ -28,22 +31,27 @@ Enemigo generarEnemigo(int nivel) {
     };
 }
 
+// Main battle loop - returns true if player wins, false otherwise
 bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventario, int& totalCurado, bool& usoObjetos) {
     vector<Estado> estadosEnemigo;
     vector<vector<Estado>> estadosPersonajes(equipo.size());
 
+    // While enemy is alive and at least one hero is alive
     while (enemigo.hp > 0 && any_of(equipo.begin(), equipo.end(), [](Personaje& p) { return p.hp > 0; })) {
         clearScreen();
         printSeparator(40);
         cout << "BATALLA CONTRA: " << enemigo.nombre << "\n";
         mostrarBarraVida(enemigo.nombre, enemigo.hp, 400);
 
+        // Apply status effects to enemy (e.g., poison)
         procesarEstados(estadosEnemigo, enemigo.hp, enemigo.atk, enemigo.def);
 
+        // Player turn (each alive character)
         for (size_t i = 0; i < equipo.size(); ++i) {
             auto& p = equipo[i];
             if (p.hp <= 0) continue;
 
+            // Apply status effects to the player character
             procesarEstados(estadosPersonajes[i], p.hp, p.atk, p.def);
 
             cout << "\nTURNO DE " << p.nombre << "\n";
@@ -54,23 +62,28 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
 
             switch (opcion) {
                 case 1: {
+                    // Basic attack
                     int dano = max(0, p.atk - enemigo.def);
                     enemigo.hp -= dano;
                     cout << p.nombre << " ataca y causa " << dano << " de dano.\n";
                     break;
                 }
                 case 2: {
+                    // Skill selection
                     cout << "Habilidades:\n";
                     for (size_t j = 0; j < p.habilidades.size(); ++j)
                         cout << j + 1 << ". " << p.habilidades[j] << "\n";
                     cout << "Elige habilidad: ";
                     int hab;
                     cin >> hab;
+
                     if (hab < 1 || hab > (int)p.habilidades.size()) {
                         cout << "Habilidad invalida.\n";
                         break;
                     }
+
                     string habilidad = p.habilidades[hab - 1];
+
                     if (habilidad == "Curar") {
                         int cantidad = 30;
                         p.hp = min(p.maxHp, p.hp + cantidad);
@@ -95,6 +108,7 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                         enemigo.atk = max(0, enemigo.atk - 10);
                         cout << p.nombre << " congela al enemigo y reduce su ataque.\n";
                     } else {
+                        // Generic skill damage
                         int dmg = 25;
                         enemigo.hp -= dmg;
                         cout << p.nombre << " lanza " << habilidad << " causando " << dmg << " de dano.\n";
@@ -102,18 +116,21 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                     break;
                 }
                 case 3: {
+                    // Using item from inventory
                     cout << "Inventario:\n";
                     for (size_t j = 0; j < inventario.size(); ++j)
                         cout << j + 1 << ". " << inventario[j].nombre << " (x" << inventario[j].cantidad << ")\n";
                     cout << "Elige objeto: ";
                     int obj;
                     cin >> obj;
+
                     if (obj < 1 || obj > (int)inventario.size()) {
                         cout << "Objeto invalido.\n";
                         break;
                     }
 
                     Item& item = inventario[obj - 1];
+
                     if (item.cantidad <= 0) {
                         cout << "No quedan de ese objeto.\n";
                         break;
@@ -143,7 +160,6 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
                     } else {
                         cout << "Objeto no reconocido.\n";
                     }
-
                     break;
                 }
                 default:
@@ -155,6 +171,7 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
             if (enemigo.hp <= 0) break;
         }
 
+        // Enemy turn if still alive
         if (enemigo.hp > 0) {
             vector<Personaje*> vivos;
             for (auto& p : equipo)
@@ -170,5 +187,5 @@ bool batalla(vector<Personaje>& equipo, Enemigo& enemigo, vector<Item>& inventar
         }
     }
 
-    return enemigo.hp <= 0;
+    return enemigo.hp <= 0; // Returns true if enemy defeated
 }

@@ -3,25 +3,25 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <algorithm> // Para min y max
+#include <algorithm> // For min and max
 #include "Personajes.h"
 #include "Batlle.h"
 
 using namespace std;
 
-// Carga el inventario desde archivo, si no existe, usa inventario por defecto
+// Loads the inventory from a file. If the file doesn't exist, returns a default inventory.
 vector<Item> cargarInventario() {
     vector<Item> inventario = {
-        {"🧪 Poción", "Curar25", 5},
-        {"✨ Elixir", "CurarTodo", 2},
-        {"💣 Bomba de Fuego", "Daño30", 3},
-        {"🛡️ Escudo Mágico", "Defensa10", 1},
-        {"☠️ Veneno", "DañoPorTurno", 2}
+        {"Pocion", "Curar25", 5},
+        {"Elixir", "CurarTodo", 2},
+        {"BombaDeFuego", "Daño30", 3},
+        {"EscudoMagico", "Defensa10", 1},
+        {"Veneno", "DañoPorTurno", 2}
     };
 
     ifstream archivo("inventory.txt");
     if (!archivo.is_open()) {
-        cout << "\033[33m⚠️ No se pudo abrir el archivo de inventario. Usando inventario por defecto.\033[0m\n";
+        cout << "[Aviso] No se encontro el archivo del inventario. Usando items por defecto.\n";
         return inventario;
     }
 
@@ -29,6 +29,7 @@ vector<Item> cargarInventario() {
     string nombre, efecto;
     int cantidad;
 
+    // Read inventory items from file
     while (archivo >> nombre >> efecto >> cantidad) {
         inventario.push_back({nombre, efecto, cantidad});
     }
@@ -37,11 +38,11 @@ vector<Item> cargarInventario() {
     return inventario;
 }
 
-// Guarda el inventario actual en archivo
+// Saves the current inventory to a file
 void guardarInventario(const vector<Item>& inventario) {
     ofstream archivo("inventory.txt");
     if (!archivo.is_open()) {
-        cout << "\033[31m❌ Error al guardar inventario en archivo.\033[0m\n";
+        cout << "[Error] No se pudo guardar el inventario.\n";
         return;
     }
 
@@ -50,13 +51,13 @@ void guardarInventario(const vector<Item>& inventario) {
     }
 
     archivo.close();
-    cout << "\033[32m✅ Inventario guardado exitosamente.\033[0m\n";
+    cout << "[Exito] Inventario guardado correctamente.\n";
 }
 
-// Aplica el efecto del objeto seleccionado sobre un personaje o enemigo
-void usarItem(Item& item, Personaje & personaje, Enemigo& enemigo) {
+// Applies the item's effect to either the character or the enemy
+void usarItem(Item& item, Personaje& personaje, Enemigo& enemigo) {
     if (item.cantidad <= 0) {
-        cout << "\033[31m❌ No quedan " << item.nombre << " disponibles.\033[0m\n";
+        cout << "[Error] No quedan mas unidades de " << item.nombre << ".\n";
         return;
     }
 
@@ -64,25 +65,24 @@ void usarItem(Item& item, Personaje & personaje, Enemigo& enemigo) {
 
     if (item.efecto == "Curar25") {
         personaje.hp = min(personaje.maxHp, personaje.hp + 25);
-        cout << "\033[32m💚 " << personaje.nombre << " recupera 25 puntos de vida.\033[0m\n";
+        cout << personaje.nombre << " recupera 25 puntos de vida.\n";
     } 
     else if (item.efecto == "CurarTodo") {
         personaje.hp = personaje.maxHp;
-        cout << "\033[32m💚 " << personaje.nombre << " se cura completamente.\033[0m\n";
+        cout << personaje.nombre << " se cura completamente.\n";
     } 
     else if (item.efecto == "Daño30") {
         enemigo.hp = max(0, enemigo.hp - 30);
-        cout << "\033[31m🔥 " << enemigo.nombre << " recibe 30 puntos de daño por la bomba.\033[0m\n";
+        cout << enemigo.nombre << " recibe 30 puntos de daño por bomba.\n";
     } 
     else if (item.efecto == "Defensa10") {
         personaje.def += 10;
-        cout << "\033[36m🛡️ " << personaje.nombre << " aumenta su defensa en 10 puntos temporalmente.\033[0m\n";
+        cout << personaje.nombre << " aumenta su defensa en 10 temporalmente.\n";
     }
     else if (item.efecto == "DañoPorTurno") {
-        // Aquí podrías añadir un estado al enemigo si tienes un sistema de estados
-        cout << "\033[35m☠️ " << enemigo.nombre << " ha sido envenenado y sufrirá daño por turnos.\033[0m\n";
+        cout << enemigo.nombre << " ha sido envenenado.\n";
     }
     else {
-        cout << "\033[33m⚠️ Efecto del objeto no reconocido.\033[0m\n";
+        cout << "[Aviso] Efecto de objeto no reconocido.\n";
     }
 }

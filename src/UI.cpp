@@ -10,33 +10,35 @@
 
 using namespace std;
 
-// Limpia la pantalla según el sistema operativo
+// Clears the console screen depending on the operating system
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
 #else
-    cout << "\033[2J\033[1;1H"; // Código ANSI para limpiar pantalla
+    cout << "\033[2J\033[1;1H"; // ANSI escape code to clear screen
 #endif
 }
 
-// Pausa la consola esperando que el usuario presione Enter
-void pauseConsole(const string& message) {
-    cout << "\n" << message << "\n";
-    cin.clear();
-    cin.ignore(10000, '\n');
-    cout << "Presiona Enter para continuar...";
-    cin.get();
+// Pauses the console and waits for the user to press Enter
+void pauseConsole(const std::string& message) {
+    std::cout << "\n" << message << "\n";
+    
+    // Limpia cualquier carácter sobrante en el buffer de entrada
+    if (std::cin.peek() == '\n') std::cin.get();
+
+    std::cout << "Presiona Enter para continuar...";
+    std::cin.get();
 }
 
-// Muestra una barra de vida con colores según la cantidad de HP
+// Displays a health bar with colors based on current HP
 void mostrarBarraVida(const string& nombre, int hp, int maxHp) {
     const int barraLength = 30;
     int filledLength = (hp * barraLength) / maxHp;
 
     string color;
-    if (hp > maxHp * 0.5) color = "\033[32m";       // Verde
-    else if (hp > maxHp * 0.2) color = "\033[33m";  // Amarillo
-    else color = "\033[31m";                        // Rojo
+    if (hp > maxHp * 0.5) color = "\033[32m";       // Green
+    else if (hp > maxHp * 0.2) color = "\033[33m";  // Yellow
+    else color = "\033[31m";                         // Red
 
     cout << nombre << ": [";
     cout << color;
@@ -47,13 +49,13 @@ void mostrarBarraVida(const string& nombre, int hp, int maxHp) {
     cout << "] " << hp << "/" << maxHp << "\n";
 }
 
-// Imprime una línea separadora visual
+// Prints a visual separator line of given length
 void printSeparator(int length) {
     for (int i = 0; i < length; ++i) cout << "=";
     cout << "\n";
 }
 
-// Escribe texto con efecto de máquina de escribir
+// Writes text with a typewriter effect (prints character by character)
 void typeWriter(const string& text, unsigned int millisPerChar) {
     for (char c : text) {
         cout << c << flush;
